@@ -155,6 +155,7 @@ class TestInTotoVerifyTool(tests.common.CliTestCase):
 
 
 
+@unittest.skipIf(os.getenv("TEST_SKIP_GPG"), "gpg not found")
 class TestInTotoVerifyToolGPG(tests.common.CliTestCase):
   """ Tests in-toto-verify like TestInTotoVerifyTool but with
   gpg project owner and functionary keys. """
