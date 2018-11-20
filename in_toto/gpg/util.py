@@ -185,15 +185,22 @@ def parse_subpackets(subpacket_octets):
   # not the length of the length.
   while ptr < len(subpacket_octets):
     length = subpacket_octets[ptr]
-    ptr += 1
 
-    if length > 192 and length < 255 : # pragma: no cover
-      length = ((length - 192 << 8) + (subpacket_octets[ptr] + 192))
+    #  [0, 191] 1 octet length
+    if length < 192:
       ptr += 1
-
-    if length == 255: # pragma: no cover
+    #  [224, 254] partial length header
+    elif length > 223 and length < 255 : # pragma: no cover
+      length = 1 << (length & 0x1F);
+      ptr += 1
+    #  [192, 223] 2 octet length
+    elif length > 191 and length < 224 : # pragma: no cover
+      length = ((length - 192 << 8) + (subpacket_octets[ptr] + 192))
+      ptr += 2
+    #  [255] 5 octet length
+    elif length == 255: # pragma: no cover
       length = struct.unpack(">I", subpacket_octets[ptr:ptr + 4])
-      ptr += 4
+      ptr += 5
 
     packet_type = subpacket_octets[ptr]
     ptr += 1
